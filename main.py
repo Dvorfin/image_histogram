@@ -176,107 +176,115 @@ if __name__ == '__main__':
                   'calib3p_res_crop', 'calib2p_res_crop']
 
 
-    for i in range(9):
+    #for i in range(9):
 
-        path = imgs_paths[i]
-        print(path)
-        #img = cv.imread(path)
-        img = cv.imread('C:/Users/Root/Desktop/crop/' + path + '.tif')
+    path = imgs_paths[-1]
+    print(path)
+    #img = cv.imread(path)
+    img = cv.imread('C:/Users/Root/Documents/MEGAsync/diplom/scans/masked/crop/' + path + '.tif')
 
-        print(img.shape)
-        y, x, _ = img.shape
-        img = img[5:y - 5, 5:x - 5]
-        print(img.shape)
-        img_g = img[:, :, 1]
+    print(img.shape)
+    y, x, _ = img.shape
+    img = img[10:y - 10, 10:x - 10]
+    print(img.shape)
+    img_g = img[:, :, 1]
 
-        # print(imgs_paths[0])
-        # print(f' max val from all {img_g.max()}')
-        # print(f' avg val from all {np.average(img_g)}')
-        # print(f' min val from all {img_g.min()}')
 
-       # img_g = cv.GaussianBlur(img_g, (11, 11), 9)
-        img = cv.GaussianBlur(img, (21, 21), 15)
+    # print(imgs_paths[0])
+    # print(f' max val from all {img_g.max()}')
+    # print(f' avg val from all {np.average(img_g)}')
+    # print(f' min val from all {img_g.min()}')
 
-        histr = cv.calcHist([img], [1], None, [256], [0, 256])
+   # img_g = cv.GaussianBlur(img_g, (11, 11), 9)
+    img = cv.GaussianBlur(img, (21, 21), 15)
 
+    histr = cv.calcHist([img], [1], None, [256], [0, 256])
+
+    plt.bar([str(i) for i in range(256)], histr.flatten())
+
+    # np.random.seed(123)
+    # groups = [f"P{i}" for i in range(7)]
+    # counts = np.random.randint(3, 10, len(groups))
+    # plt.bar(groups, counts)
+
+    for i in range(len(histr)):
+        if histr[i] <= 200:
+            histr[i] = 0
+
+    plt.figure(figsize=(8, 5))
+
+    with open('res.txt', 'w+', encoding='utf8') as file:
         for i in range(len(histr)):
-            if histr[i] <= 200:
-                histr[i] = 0
-
-        plt.figure(figsize=(8, 5))
-
-        with open('res.txt', 'w', encoding='utf8') as file:
-            for val in histr:
-                file.write(str(int(val)) + '\n')
+            file.write(f'{str(i)} {str(int(histr[i]))}\n')
 
 
-        accum = 0
-        prev = 0
-        min_r = 0
-        for i in range(len(histr)):
-            if histr[i] > 0:
-                accum += histr[i]
-                if accum >= 1000:
-                    print(f'min = {i}')
-                    min_r = i
-                    plt.axvline(x=i, ymin=0.05, ymax=0.55, color='red', ls='--')
-                    break
-            # if histr[i] - prev > 1500:
-            #     print(f'min = {i}')
-            #     min_r = i
-            #     plt.axvline(x=i, ymin=0.05, ymax=0.55, color='red', ls='--')
-            #     break
-            # else:
-            #     prev = histr[i]
+    accum = 0
+    prev = 0
+    min_r = 0
+    for i in range(len(histr)):
+        if histr[i] > 0:
+            accum += histr[i]
+            if accum >= 1000:
+                print(f'min = {i}')
+                min_r = i
+                plt.axvline(x=i, ymin=0.05, ymax=0.55, color='red', ls='--')
+                break
+        # if histr[i] - prev > 1500:
+        #     print(f'min = {i}')
+        #     min_r = i
+        #     plt.axvline(x=i, ymin=0.05, ymax=0.55, color='red', ls='--')
+        #     break
+        # else:
+        #     prev = histr[i]
 
-        accum = 0
-        prev = 0
-        max_r = 0
-        for i in range(len(histr) - 1, 0, - 1):
-            if histr[i] > 0:
-                accum += histr[i]
-                if accum >= 1000:
-                    print(f'max = {i}')
-                    max_r = i
-                    plt.axvline(x=i, ymin=0.05, ymax=0.55, color='red', ls='--')
-                    break
-            # if histr[i] - prev > 1500:
-            #     print(f'max = {i}')
-            #     max_r = i
-            #     plt.axvline(x=i, ymin=0.05, ymax=0.55, color='red', ls='--')
-            #     break
-            # else:
-            #     prev = histr[i]
+    accum = 0
+    prev = 0
+    max_r = 0
+    for i in range(len(histr) - 1, 0, - 1):
+        if histr[i] > 0:
+            accum += histr[i]
+            if accum >= 1000:
+                print(f'max = {i}')
+                max_r = i
+                plt.axvline(x=i, ymin=0.05, ymax=0.55, color='red', ls='--')
+                break
+        # if histr[i] - prev > 1500:
+        #     print(f'max = {i}')
+        #     max_r = i
+        #     plt.axvline(x=i, ymin=0.05, ymax=0.55, color='red', ls='--')
+        #     break
+        # else:
+        #     prev = histr[i]
 
-        print(f'range: = {max_r - min_r}')
-        print(f'avg = {round(np.average(img_g), 3)}')
+    print(f'range: = {max_r - min_r}')
+    print(f'avg = {round(np.average(img_g), 3)}')
 
-        print()
+    print()
 
-        MAT = round(calc_mat_expectation(histr), 3)
-        print(f'M[x] = {MAT}')
-        print(f'D[x] = {round(calc_mat_dispertion(histr), 3)}')
-        sigma = calc_mat_dispertion(histr) ** 0.5
-        print(f'СКО = {round(sigma, 3)}')
+    MAT = round(calc_mat_expectation(histr), 3)
+    print(f'M[x] = {MAT}')
+    print(f'D[x] = {round(calc_mat_dispertion(histr), 3)}')
+    sigma = calc_mat_dispertion(histr) ** 0.5
+    print(f'СКО = {round(sigma, 3)}')
 
-     #   plt.axvline(x=MAT, ymin=0.05, ymax=0.66, color='y', ls='--')
-     #   plt.axvline(x=MAT - 3 * sigma, ymin=0.05, ymax=0.55, color='b', ls='dotted')
-      #  plt.axvline(x=MAT + 3 * sigma, ymin=0.05, ymax=0.55, color='b', ls='dotted')
+ #   plt.axvline(x=MAT, ymin=0.05, ymax=0.66, color='y', ls='--')
+ #   plt.axvline(x=MAT - 3 * sigma, ymin=0.05, ymax=0.55, color='b', ls='dotted')
+  #  plt.axvline(x=MAT + 3 * sigma, ymin=0.05, ymax=0.55, color='b', ls='dotted')
 
-        print(f'sigma min: {round(MAT - 3 * sigma, 3)}\nsigma max: {round(MAT + 3 * sigma, 3)}')
+    print(f'sigma min: {round(MAT - 3 * sigma, 3)}\nsigma max: {round(MAT + 3 * sigma, 3)}')
 
-        plt.plot(histr, color='g')
-        plt.xlim([min_r - 10, max_r + 10])
+    plt.plot(histr, color='g')
+    plt.xlim([min_r - 10, max_r + 10])
 
-        import matplotlib.ticker as mticker
-        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter('%d'))
-        plt.title(f'{path}')
-        plt.ylabel('Количество точек')
-        plt.xlabel('Диапазон точек')
+    import matplotlib.ticker as mticker
+    plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter('%d'))
+    plt.title(f'{path}')
+    plt.ylabel('Количество точек')
+    plt.xlabel('Диапазон точек')
 
-        #plt.show()
+    plt.show()
 
-        plt.savefig('C:/Users/Root/Desktop/crop/' + path, bbox_inches='tight')
+   # plt.savefig('C:/Users/Root/Desktop/crop/' + path, bbox_inches='tight')
 
     # img_g = list(img_g.flatten())
     #
